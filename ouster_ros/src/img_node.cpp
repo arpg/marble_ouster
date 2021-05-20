@@ -22,8 +22,9 @@
 #include <thread>
 #include <vector>
 
+#include "ouster/autoexposure.h"
+#include "ouster/beam_uniformity.h"
 #include "ouster/client.h"
-#include "ouster/image_processing.h"
 #include "ouster/types.h"
 #include "ouster_ros/OSConfigSrv.h"
 #include "ouster_ros/ros.h"
@@ -102,8 +103,10 @@ int main(int argc, char** argv) {
                                     (8 * sizeof(*intensity_image.data.data())));
         intensity_image.header.stamp = m->header.stamp;
 
-        ouster::img_t<double> ambient_image_eigen(H, W);
-        ouster::img_t<double> intensity_image_eigen(H, W);
+        using im_t = Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic,
+                                  Eigen::RowMajor>;
+        im_t ambient_image_eigen(H, W);
+        im_t intensity_image_eigen(H, W);
 
         for (size_t u = 0; u < H; u++) {
             for (size_t v = 0; v < W; v++) {
@@ -126,9 +129,11 @@ int main(int argc, char** argv) {
             }
         }
 
-        ambient_buc(ambient_image_eigen);
-        ambient_ae(ambient_image_eigen);
-        intensity_ae(intensity_image_eigen);
+        ambient_buc.correct(ambient_image_eigen);
+        ambient_ae(
+            Eigen::Map<Eigen::ArrayXd>(ambient_image_eigen.data(), W * H));
+        intensity_ae(
+            Eigen::Map<Eigen::ArrayXd>(intensity_image_eigen.data(), W * H));
         ambient_image_eigen = ambient_image_eigen.sqrt();
         intensity_image_eigen = intensity_image_eigen.sqrt();
         for (size_t u = 0; u < H; u++) {

@@ -33,11 +33,21 @@ static StaticWrapper resources = {};
 #endif
 
 int socket_close(SOCKET sock) {
+    int status = 0;
+
 #ifdef _WIN32
-    return closesocket(sock);
+    status = shutdown(sock, SD_BOTH);
+    if (status == 0) {
+        status = closesocket(sock);
+    }
 #else
-    return close(sock);
+    status = shutdown(sock, SHUT_RDWR);
+    if (status == 0) {
+        status = close(sock);
+    }
 #endif
+
+    return status;
 }
 
 std::string socket_get_error() {

@@ -29,14 +29,8 @@
 #include <arpa/inet.h>
 
 // Define windows types
-#ifndef SOCKET
-  #define SOCKET int
-#endif
-
-#ifndef FDSET
-  #define FDSET fd_set
-#endif
-
+typedef int SOCKET;
+typedef fd_set FDSET;
 #define SOCKET_ERROR -1
 
 #endif  // --------- End Platform Differentiation Block ---------

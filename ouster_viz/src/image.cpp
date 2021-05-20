@@ -1,6 +1,3 @@
-#include "image.h"
-
-#include <GL/glew.h>
 
 #include "ouster/point_viz.h"
 
